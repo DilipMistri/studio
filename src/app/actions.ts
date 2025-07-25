@@ -1,38 +1,15 @@
 'use server';
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateRecipeFlow, GenerateRecipeFlowInput } from '@/ai/flows/recipe-flow';
 import { GeneratedRecipe } from '@/lib/types';
 
+
 export async function generateRecipe(
-  ingredients: string,
-  servings: number,
+  input: GenerateRecipeFlowInput
 ): Promise<GeneratedRecipe | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('Missing Gemini API key');
-  }
-
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-  });
-
-  const prompt = `You are a recipe generating expert. Given a list of ingredients, create a recipe in Gujarati.
-The recipe should be for ${servings} servings.
-Ingredients: ${ingredients}
-Return the response as a JSON object with the following structure: { "title": "...", "ingredients": [{ "name": "...", "quantity": "..." }, ...], "steps": ["...", "..."] }
-The ingredient quantities should be in grams or kilograms as appropriate for the serving size. The title, ingredient names, and steps must be in Gujarati.`;
-
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    // Clean the text to ensure it's valid JSON
-    const jsonString = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
-    const recipe: GeneratedRecipe = JSON.parse(jsonString);
-    return recipe;
+    const result = await generateRecipeFlow(input);
+    return result;
   } catch (error) {
     console.error('Error generating recipe:', error);
     return null;
