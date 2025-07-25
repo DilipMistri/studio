@@ -18,6 +18,7 @@ const RecipeIngredientSchema = z.object({
 const GenerateRecipeFlowInputSchema = z.object({
   ingredients: z.string().describe('A comma-separated list of ingredients.'),
   servings: z.number().describe('The number of servings the recipe should be for.'),
+  language: z.string().describe('The language for the generated recipe (e.g., English, Gujarati).'),
 });
 export type GenerateRecipeFlowInput = z.infer<typeof GenerateRecipeFlowInputSchema>;
 
@@ -36,7 +37,8 @@ const recipePrompt = ai.definePrompt({
     prompt: `You are a recipe generating expert. Given a list of ingredients, create a recipe.
 The recipe should be for {{servings}} servings.
 Ingredients: {{ingredients}}
-The ingredient quantities should be in grams or kilograms as appropriate for the serving size.`,
+The ingredient quantities should be in grams or kilograms as appropriate for the serving size.
+The generated recipe must be in the following language: {{language}}.`,
 });
 
 export const generateRecipeFlow = ai.defineFlow(
@@ -56,4 +58,38 @@ export const generateRecipeFlow = ai.defineFlow(
     
     return output;
   }
+);
+
+const ValidateIngredientsInputSchema = z.object({
+    ingredients: z.string().describe('A comma-separated list of ingredients.'),
+});
+
+const ValidateIngredientsOutputSchema = z.object({
+    isValid: z.boolean().describe('Whether the input is a valid list of ingredients.'),
+    language: z.string().describe('The detected language of the ingredients (e.g., "English", "Gujarati", "Unknown").'),
+});
+
+const validationPrompt = ai.definePrompt({
+    name: 'validationPrompt',
+    input: { schema: ValidateIngredientsInputSchema },
+    output: { schema: ValidateIngredientsOutputSchema },
+    prompt: `You are an expert at validating user input for a recipe app.
+The user has provided the following list of ingredients: {{ingredients}}.
+Check if this looks like a valid list of food ingredients. It should not be a random string.
+Also, detect if the language is English or Gujarati. If it is neither, mark the language as "Unknown".`,
+});
+
+export const validateIngredientsFlow = ai.defineFlow(
+    {
+        name: 'validateIngredientsFlow',
+        inputSchema: ValidateIngredientsInputSchema,
+        outputSchema: ValidateIngredientsOutputSchema,
+    },
+    async (input) => {
+        const { output } = await validationPrompt.generate({ input });
+        if (!output) {
+            throw new Error('Failed to validate ingredients.');
+        }
+        return output;
+    }
 );

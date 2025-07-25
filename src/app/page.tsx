@@ -16,12 +16,14 @@ import { useFavorites } from '@/hooks/useFavorites';
 import type { Recipe } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const FormSchema = z.object({
   ingredients: z.string().min(10, {
     message: 'Please list at least a few ingredients (minimum 10 characters).',
   }),
   servings: z.coerce.number().min(1, { message: 'Please enter at least 1 serving.' }).default(2),
+  language: z.string().default('English'),
 });
 
 // A simple random ID generator that is more widely supported.
@@ -40,6 +42,7 @@ export default function Home() {
     defaultValues: {
       ingredients: '',
       servings: 2,
+      language: 'English',
     },
   });
 
@@ -49,7 +52,7 @@ export default function Home() {
       try {
         const result = await generateRecipe(data);
         if (!result) {
-            throw new Error("No recipe was generated.");
+            throw new Error("No recipe was generated. The ingredients may not be valid.");
         }
         const recipeWithId: Recipe = { ...result, id: randomId() };
         setGeneratedRecipe(recipeWithId);
@@ -58,7 +61,7 @@ export default function Home() {
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'There was a problem generating your recipe. Please try again.',
+          description: 'There was a problem generating your recipe. Please check your ingredients and try again.',
         });
       }
     });
@@ -112,6 +115,27 @@ export default function Home() {
                     <FormMessage />
                     </FormItem>
                 )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Language</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="English">English</SelectItem>
+                          <SelectItem value="Gujarati">Gujarati</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
             </div>
 
