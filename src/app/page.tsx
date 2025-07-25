@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Languages, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { generateRecipe } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -16,24 +16,12 @@ import { useFavorites } from '@/hooks/useFavorites';
 import type { Recipe } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const FormSchema = z.object({
   ingredients: z.string().min(10, {
     message: 'Please list at least a few ingredients (minimum 10 characters).',
   }),
   servings: z.coerce.number().min(1, { message: 'Please enter at least 1 serving.' }).default(2),
-  language: z.string().default('English'),
-}).refine(data => {
-    if (data.language === 'Gujarati') {
-        // Basic check for Gujarati characters
-        return /[\u0A80-\u0AFF]/.test(data.ingredients);
-    }
-    // Basic check for English characters
-    return /[a-zA-Z]/.test(data.ingredients);
-}, {
-    message: "The ingredients don't seem to be in the selected language.",
-    path: ['ingredients'],
 });
 
 // A simple random ID generator that is more widely supported.
@@ -52,7 +40,6 @@ export default function Home() {
     defaultValues: {
       ingredients: '',
       servings: 2,
-      language: 'English',
     },
   });
 
@@ -63,13 +50,6 @@ export default function Home() {
         const result = await generateRecipe(data);
         if (!result) {
             throw new Error("No recipe was generated.");
-        }
-        if (!result.isValid) {
-            toast({
-                variant: 'destructive',
-                title: 'Could not validate recipe',
-                description: 'We could not confirm if this is a valid recipe. Please try again.',
-            });
         }
         const recipeWithId: Recipe = { ...result, id: randomId() };
         setGeneratedRecipe(recipeWithId);
@@ -129,28 +109,6 @@ export default function Home() {
                     <FormControl>
                         <Input type="number" min="1" {...field} />
                     </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="language"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Language</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <Languages className="mr-2 h-4 w-4" />
-                            <SelectValue placeholder="Select a language" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="Gujarati">Gujarati</SelectItem>
-                        </SelectContent>
-                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
