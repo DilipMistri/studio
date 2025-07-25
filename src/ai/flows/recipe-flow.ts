@@ -65,7 +65,7 @@ const ValidateIngredientsInputSchema = z.object({
 });
 
 const ValidateIngredientsOutputSchema = z.object({
-    isValid: z.boolean().describe('Whether the input is a valid list of ingredients.'),
+    isValid: z.boolean().describe('Whether the input is a valid list of food ingredients.'),
     language: z.string().describe('The detected language of the ingredients (e.g., "English", "Gujarati", "Unknown").'),
 });
 
