@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 
-import { generateRecipe } from '@/ai/flows/generate-recipe';
+import { generateRecipe } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,7 +39,10 @@ export default function Home() {
     setGeneratedRecipe(null);
     startTransition(async () => {
       try {
-        const result = await generateRecipe({ ingredients: data.ingredients });
+        const result = await generateRecipe(data.ingredients);
+        if (!result) {
+            throw new Error("No recipe was generated.");
+        }
         const recipeWithId: Recipe = { ...result, id: crypto.randomUUID() };
         setGeneratedRecipe(recipeWithId);
       } catch (error) {

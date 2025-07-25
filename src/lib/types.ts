@@ -1,3 +1,7 @@
-import type { GenerateRecipeOutput } from '@/ai/flows/generate-recipe';
+export interface GeneratedRecipe {
+    title: string;
+    ingredients: string[];
+    steps: string[];
+}
 
-export type Recipe = GenerateRecipeOutput & { id: string };
+export type Recipe = GeneratedRecipe & { id: string };
