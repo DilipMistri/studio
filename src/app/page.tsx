@@ -16,12 +16,14 @@ import { useFavorites } from '@/hooks/useFavorites';
 import type { Recipe } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 
 const FormSchema = z.object({
   ingredients: z.string().min(10, {
     message: 'Please list at least a few ingredients (minimum 10 characters).',
   }),
   priceRange: z.tuple([z.number(), z.number()]).default([100, 1000]),
+  servings: z.coerce.number().min(1, { message: 'Please enter at least 1 serving.' }).default(2),
 });
 
 export default function Home() {
@@ -36,6 +38,7 @@ export default function Home() {
     defaultValues: {
       ingredients: '',
       priceRange: [100, 1000],
+      servings: 2,
     },
   });
 
@@ -43,7 +46,7 @@ export default function Home() {
     setGeneratedRecipe(null);
     startTransition(async () => {
       try {
-        const result = await generateRecipe(data.ingredients, data.priceRange);
+        const result = await generateRecipe(data.ingredients, data.priceRange, data.servings);
         if (!result) {
             throw new Error("No recipe was generated.");
         }
@@ -95,6 +98,20 @@ export default function Home() {
               )}
             />
             
+            <FormField
+              control={form.control}
+              name="servings"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Servings</FormLabel>
+                  <FormControl>
+                    <Input type="number" min="1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="priceRange"

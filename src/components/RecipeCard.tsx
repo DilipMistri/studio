@@ -29,7 +29,7 @@ export function RecipeCard({ recipe, isFavorite, onToggleFavorite }: RecipeCardP
           <h3 className="mb-2 font-headline text-lg font-semibold">Ingredients</h3>
           <ul className="list-inside list-disc space-y-1 text-card-foreground/80">
             {recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>{ingredient.name} - <span className="font-semibold">{ingredient.price}</span></li>
+              <li key={index}>{ingredient.name} ({ingredient.quantity}) - <span className="font-semibold">{ingredient.price}</span></li>
             ))}
           </ul>
         </div>
