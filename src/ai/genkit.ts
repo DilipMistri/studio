@@ -1,16 +1,16 @@
 import { genkit, configureGenkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
-import {-next-js} from 'genkit/plugins';
+import {nextJs} from 'genkit/plugins';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 configureGenkit({
   plugins: [
     googleAI({
         apiVersion: 'v1beta',
     }),
-    -next-js(),
+    nextJs(),
   ],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
