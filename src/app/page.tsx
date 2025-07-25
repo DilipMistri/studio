@@ -15,14 +15,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/useFavorites';
 import type { Recipe } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 
 const FormSchema = z.object({
   ingredients: z.string().min(10, {
     message: 'Please list at least a few ingredients (minimum 10 characters).',
   }),
-  priceRange: z.tuple([z.number(), z.number()]).default([100, 1000]),
   servings: z.coerce.number().min(1, { message: 'Please enter at least 1 serving.' }).default(2),
 });
 
@@ -31,13 +29,11 @@ export default function Home() {
   const [generatedRecipe, setGeneratedRecipe] = useState<Recipe | null>(null);
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [priceRange, setPriceRange] = useState<[number, number]>([100, 1000]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       ingredients: '',
-      priceRange: [100, 1000],
       servings: 2,
     },
   });
@@ -46,7 +42,7 @@ export default function Home() {
     setGeneratedRecipe(null);
     startTransition(async () => {
       try {
-        const result = await generateRecipe(data.ingredients, data.priceRange, data.servings);
+        const result = await generateRecipe(data.ingredients, data.servings);
         if (!result) {
             throw new Error("No recipe was generated.");
         }
@@ -107,33 +103,6 @@ export default function Home() {
                   <FormControl>
                     <Input type="number" min="1" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="priceRange"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price Range (INR)</FormLabel>
-                   <FormControl>
-                    <Slider
-                      min={0}
-                      max={5000}
-                      step={50}
-                      value={field.value}
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setPriceRange(value as [number, number]);
-                      }}
-                      className="w-full"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Generate a recipe with a total cost between ₹{priceRange[0]} and ₹{priceRange[1]}.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

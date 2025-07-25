@@ -1,7 +1,6 @@
 export interface Ingredient {
     name: string;
     quantity: string;
-    price: string;
 }
 
 export interface GeneratedRecipe {
