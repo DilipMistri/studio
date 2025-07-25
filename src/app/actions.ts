@@ -13,12 +13,12 @@ export async function generateRecipe(
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-1.5-flash',
   });
 
-  const prompt = `You are a recipe generating expert. Given a list of ingredients, create a recipe including the title, ingredients list, and preparation steps.
+  const prompt = `You are a recipe generating expert. Given a list of ingredients, create a recipe including the title, ingredients list (with estimated price in INR for each), and preparation steps.
 Ingredients: ${ingredients}
-Return the response as a JSON object with the following structure: { "title": "...", "ingredients": ["...", "..."], "steps": ["...", "..."] }`;
+Return the response as a JSON object with the following structure: { "title": "...", "ingredients": [{ "name": "...", "price": "₹..." }, { "name": "...", "price": "₹..." }], "steps": ["...", "..."] }`;
 
   try {
     const result = await model.generateContent(prompt);

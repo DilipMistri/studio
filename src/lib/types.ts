@@ -1,6 +1,11 @@
+export interface Ingredient {
+    name: string;
+    price: string;
+}
+
 export interface GeneratedRecipe {
     title: string;
-    ingredients: string[];
+    ingredients: Ingredient[];
     steps: string[];
 }
 
