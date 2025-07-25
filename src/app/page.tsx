@@ -15,11 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/useFavorites';
 import type { Recipe } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Slider } from '@/components/ui/slider';
 
 const FormSchema = z.object({
   ingredients: z.string().min(10, {
     message: 'Please list at least a few ingredients (minimum 10 characters).',
   }),
+  priceRange: z.tuple([z.number(), z.number()]).default([100, 1000]),
 });
 
 export default function Home() {
@@ -27,11 +29,13 @@ export default function Home() {
   const [generatedRecipe, setGeneratedRecipe] = useState<Recipe | null>(null);
   const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const [priceRange, setPriceRange] = useState<[number, number]>([100, 1000]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       ingredients: '',
+      priceRange: [100, 1000],
     },
   });
 
@@ -39,7 +43,7 @@ export default function Home() {
     setGeneratedRecipe(null);
     startTransition(async () => {
       try {
-        const result = await generateRecipe(data.ingredients);
+        const result = await generateRecipe(data.ingredients, data.priceRange);
         if (!result) {
             throw new Error("No recipe was generated.");
         }
@@ -90,6 +94,34 @@ export default function Home() {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="priceRange"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price Range (INR)</FormLabel>
+                   <FormControl>
+                    <Slider
+                      min={0}
+                      max={5000}
+                      step={50}
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setPriceRange(value as [number, number]);
+                      }}
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Generate a recipe with a total cost between ₹{priceRange[0]} and ₹{priceRange[1]}.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button type="submit" disabled={isPending} className="w-full text-lg py-6">
               {isPending ? (
                 <>
