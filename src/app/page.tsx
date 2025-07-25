@@ -24,6 +24,11 @@ const FormSchema = z.object({
   servings: z.coerce.number().min(1, { message: 'Please enter at least 1 serving.' }).default(2),
 });
 
+// A simple random ID generator that is more widely supported.
+function randomId() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 export default function Home() {
   const [isPending, startTransition] = useTransition();
   const [generatedRecipe, setGeneratedRecipe] = useState<Recipe | null>(null);
@@ -46,7 +51,7 @@ export default function Home() {
         if (!result) {
             throw new Error("No recipe was generated.");
         }
-        const recipeWithId: Recipe = { ...result, id: crypto.randomUUID() };
+        const recipeWithId: Recipe = { ...result, id: randomId() };
         setGeneratedRecipe(recipeWithId);
       } catch (error) {
         console.error(error);
